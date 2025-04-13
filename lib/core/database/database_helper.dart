@@ -103,7 +103,7 @@ class DatabaseHelper {
     return await db.insert('sucursal', sucursal.toJson());
   }
 
-  Future<List<Sucursal>> obtenerSucursales() async {
+  Future<List<Sucursal>> obtenerSucursales([String? search]) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('sucursal');
     return List.generate(maps.length, (i) => Sucursal.fromJson(maps[i]));

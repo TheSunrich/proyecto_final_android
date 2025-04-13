@@ -3,7 +3,7 @@ import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
 
-import '../components/bottom_nav_bar.dart';
+import '../components/navbar/bottom_nav_bar.dart';
 
 class ProductoScreen extends StatefulWidget {
   const ProductoScreen({super.key});

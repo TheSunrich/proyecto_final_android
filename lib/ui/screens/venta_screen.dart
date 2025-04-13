@@ -7,7 +7,7 @@ import 'package:proyecto_final/data/models/cliente.dart';
 import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/venta.dart';
 import 'package:proyecto_final/data/models/detalle_venta.dart';
-import 'package:proyecto_final/ui/components/bottom_nav_bar.dart';
+import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
 
 
 class VentaScreen extends StatefulWidget {

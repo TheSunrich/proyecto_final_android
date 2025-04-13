@@ -23,7 +23,7 @@ class BottomNavBarItem extends StatelessWidget {
     String currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: EdgeInsets.symmetric(horizontal: 4),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () {
@@ -34,6 +34,7 @@ class BottomNavBarItem extends StatelessWidget {
           Navigator.pushReplacementNamed(context, route);
         },
         child: Container(
+          width: 80,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color:

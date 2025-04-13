@@ -75,7 +75,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ancestor: context.findRenderObject(),
         );
         _scrollController.animateTo(
-          _scrollController.offset + position.dx - 0.5 * MediaQuery.of(context).size.width + 35,
+          _scrollController.offset + position.dx - 0.5 * MediaQuery.of(context).size.width + 45,
           // 100 es un padding para centrar
           duration: Duration(milliseconds: 300),
           curve: Curves.easeInOut,

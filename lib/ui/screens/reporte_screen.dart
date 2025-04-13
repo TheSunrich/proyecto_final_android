@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
-import 'package:proyecto_final/ui/components/bottom_nav_bar.dart';
+import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
 
 class ReportesScreen extends StatefulWidget {
   const ReportesScreen({super.key});

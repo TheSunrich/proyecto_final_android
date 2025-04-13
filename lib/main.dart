@@ -7,6 +7,7 @@ import 'package:proyecto_final/ui/screens/login_screen.dart';
 import 'package:proyecto_final/ui/screens/menu_principal_screen.dart';
 import 'package:proyecto_final/ui/screens/producto_screen.dart';
 import 'package:proyecto_final/ui/screens/reporte_screen.dart';
+import 'package:proyecto_final/ui/screens/sucursal/sucursal_save_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal_screen.dart';
 import 'package:proyecto_final/ui/screens/venta_screen.dart';
 
@@ -50,6 +51,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/main',
       routes: {
         '/sucursal': (context) => SucursalScreen(),
+        '/sucursal/save': (context) => SucursalSaveScreen(),
         '/producto': (context) => ProductoScreen(),
         '/cliente': (context) => ClienteScreen(),
         '/venta': (context) => VentaScreen(),
