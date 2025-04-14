@@ -14,9 +14,8 @@ class SucursalScreen extends StatefulWidget {
 
 class _SucursalScreenState extends State<SucursalScreen> {
   final _searchController = TextEditingController();
-  final _nombreController = TextEditingController();
-  final _ubicacionController = TextEditingController();
   List<Sucursal> _sucursales = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -25,19 +24,14 @@ class _SucursalScreenState extends State<SucursalScreen> {
   }
 
   Future<void> _cargarSucursales() async {
-    final data = await DatabaseHelper().obtenerSucursales();
+    setState(() {
+      _isLoading = true;
+    });
+    final data = await DatabaseHelper().obtenerSucursales(_searchController.text.trim());
     setState(() {
       _sucursales = data;
+      _isLoading = false;
     });
-  }
-
-  Future<void> _guardarSucursal() async {
-    if (_nombreController.text.isEmpty) return;
-    final sucursal = Sucursal(nombre: _nombreController.text, ubicacion: _ubicacionController.text);
-    await DatabaseHelper().insertarSucursal(sucursal);
-    _nombreController.clear();
-    _ubicacionController.clear();
-    _cargarSucursales();
   }
 
   @override
@@ -52,24 +46,40 @@ class _SucursalScreenState extends State<SucursalScreen> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _nombreController,
-                    decoration: const InputDecoration(
+                    controller: _searchController,
+                    decoration: InputDecoration(
                       isDense: true,
                       labelText: 'Busqueda',
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
                       hintText: 'Buscar sucursal',
                       hintStyle: TextStyle(color: Colors.grey),
+                      suffixIcon: InkWell(
+                        borderRadius: BorderRadius.circular(100),
+                        radius: 10,
+                        onTap: () {
+                          _searchController.clear();
+                          FocusScope.of(context).unfocus();
+                          _cargarSucursales();
+                        },
+
+                        child: Icon(Icons.clear_rounded),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                    onPressed: (){},
-                    icon: Icon(Icons.search_rounded),
+                  onPressed:
+                      _isLoading || _sucursales.isEmpty
+                          ? null
+                          : _cargarSucursales,
+                  icon: Icon(Icons.search_rounded),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.indigo,
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey,
+                    disabledForegroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -78,16 +88,28 @@ class _SucursalScreenState extends State<SucursalScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            //ElevatedButton(onPressed: _guardarSucursal, child: const Text('Guardar')),
-            const SizedBox(height: 24),
-            SucursalList(sucursales: _sucursales),
+            _isLoading
+                ? Expanded(child: Center(child: CircularProgressIndicator()))
+                : _sucursales.isEmpty
+                ? Expanded(
+                  child: Center(child: Text('No hay sucursales registradas')),
+                )
+                : Expanded(
+                  child: SucursalList(
+                    sucursales: _sucursales,
+                    reload: _cargarSucursales,
+                  ),
+                ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavBar(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/sucursal/save');
+        onPressed: () async {
+          final res = await Navigator.pushNamed(context, '/sucursal/save');
+          if (res == true) {
+            _cargarSucursales();
+          }
         },
         child: const Icon(Icons.add),
       ),

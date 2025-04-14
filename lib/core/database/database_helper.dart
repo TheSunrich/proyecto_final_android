@@ -106,6 +106,12 @@ class DatabaseHelper {
   Future<List<Sucursal>> obtenerSucursales([String? search]) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('sucursal');
+    if (search != null && search.isNotEmpty) {
+      return List.generate(
+        maps.length,
+        (i) => Sucursal.fromJson(maps[i]),
+      ).where((sucursal) => sucursal.nombre.toLowerCase().contains(search.toLowerCase())).toList();
+    }
     return List.generate(maps.length, (i) => Sucursal.fromJson(maps[i]));
   }
 

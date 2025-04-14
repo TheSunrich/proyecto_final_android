@@ -8,8 +8,10 @@ import 'package:proyecto_final/ui/screens/menu_principal_screen.dart';
 import 'package:proyecto_final/ui/screens/producto_screen.dart';
 import 'package:proyecto_final/ui/screens/reporte_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_save_screen.dart';
-import 'package:proyecto_final/ui/screens/sucursal_screen.dart';
+import 'package:proyecto_final/ui/screens/sucursal/sucursal_screen.dart';
 import 'package:proyecto_final/ui/screens/venta_screen.dart';
+
+import 'data/models/sucursal.dart';
 
 void main() {
   runApp(
@@ -51,7 +53,9 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/main',
       routes: {
         '/sucursal': (context) => SucursalScreen(),
-        '/sucursal/save': (context) => SucursalSaveScreen(),
+        '/sucursal/save': (context) => SucursalSaveScreen(
+          sucursal: ModalRoute.of(context)?.settings.arguments as Sucursal?,
+        ),
         '/producto': (context) => ProductoScreen(),
         '/cliente': (context) => ClienteScreen(),
         '/venta': (context) => VentaScreen(),

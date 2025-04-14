@@ -2,26 +2,29 @@ import 'package:flutter/material.dart';
 
 import 'package:proyecto_final/data/models/sucursal.dart';
 
-class SucursalListItem extends StatefulWidget {
+class SucursalListItem extends StatelessWidget {
   final Sucursal sucursal;
+  final Function reload;
 
-  const SucursalListItem({super.key, required this.sucursal});
+  const SucursalListItem({
+    super.key,
+    required this.sucursal,
+    required this.reload,
+  });
 
-  @override
-  State<SucursalListItem> createState() => _SucursalListItemState();
-}
-
-class _SucursalListItemState extends State<SucursalListItem> {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
-        title: Text(widget.sucursal.nombre!),
-        subtitle: Text(widget.sucursal.ubicacion!),
+        title: Text(sucursal.nombre),
+        subtitle: Text(sucursal.ubicacion),
         trailing: IconButton(
           icon: const Icon(Icons.edit_rounded),
           onPressed: () {
-            // Aquí puedes agregar la lógica para eliminar la sucursal
+            Navigator.pushNamed(context, '/sucursal/save', arguments: sucursal)
+                as Sucursal?;
+            reload();
           },
         ),
       ),

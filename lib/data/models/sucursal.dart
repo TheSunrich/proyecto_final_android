@@ -2,20 +2,20 @@
 
 class Sucursal {
   int? id;
-  String? nombre;
-  String? ubicacion;
+  String nombre;
+  String ubicacion;
 
   Sucursal({
     this.id,
-    this.nombre,
-    this.ubicacion
+    required this.nombre,
+    required this.ubicacion
   });
 
   factory Sucursal.fromJson(Map<String, dynamic> json) {
     return Sucursal(
       id: json['id'] as int?,
-      nombre: json['nombre'] as String?,
-      ubicacion: json['ubicacion'] as String?,
+      nombre: json['nombre'] as String,
+      ubicacion: json['ubicacion'] as String,
     );
   }
 
