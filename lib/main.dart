@@ -5,7 +5,7 @@ import 'package:proyecto_final/data/providers/nav_bar_provider.dart';
 import 'package:proyecto_final/ui/screens/cliente_screen.dart';
 import 'package:proyecto_final/ui/screens/login_screen.dart';
 import 'package:proyecto_final/ui/screens/menu_principal_screen.dart';
-import 'package:proyecto_final/ui/screens/producto_screen.dart';
+import 'package:proyecto_final/ui/screens/producto/producto_screen.dart';
 import 'package:proyecto_final/ui/screens/reporte_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_save_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_screen.dart';

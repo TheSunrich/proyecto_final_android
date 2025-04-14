@@ -3,7 +3,7 @@ import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
 
-import '../components/navbar/bottom_nav_bar.dart';
+import '../../components/navbar/bottom_nav_bar.dart';
 
 class ProductoScreen extends StatefulWidget {
   const ProductoScreen({super.key});
@@ -13,6 +13,7 @@ class ProductoScreen extends StatefulWidget {
 }
 
 class _ProductoScreenState extends State<ProductoScreen> {
+  final _searchController = TextEditingController();
   final _nombreController = TextEditingController();
   final _descripcionController = TextEditingController();
   final _precioController = TextEditingController();
@@ -80,6 +81,27 @@ class _ProductoScreenState extends State<ProductoScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            DropdownMenu<Sucursal>(
+              width: double.infinity,
+              controller: _searchController,
+              label: const Text('Sucursal'),
+              onSelected: (Sucursal? val) {
+                setState(() {
+                  _sucursalSeleccionadaId = val?.id;
+                  _cargarProductos();
+                });
+              },
+              dropdownMenuEntries:
+                  _sucursales
+                      .map(
+                        (s) => DropdownMenuEntry<Sucursal>(
+
+                          value: s,
+                          label: s.nombre,
+                        ),
+                      )
+                      .toList(),
+            ),
             DropdownButton<int>(
               value: _sucursalSeleccionadaId,
               hint: const Text('Selecciona una sucursal'),
@@ -130,7 +152,9 @@ class _ProductoScreenState extends State<ProductoScreen> {
                   final p = _productos[index];
                   return ListTile(
                     title: Text(p.nombre),
-                    subtitle: Text('Precio: \$${p.precio} - Stock: ${p.stock}'),
+                    subtitle: Text(
+                      'Precio: \$${p.precio} - Stock: ${p.stock}',
+                    ),
                   );
                 },
               ),
@@ -139,6 +163,15 @@ class _ProductoScreenState extends State<ProductoScreen> {
         ),
       ),
       bottomNavigationBar: BottomNavBar(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final res = await Navigator.pushNamed(context, '/producto/save');
+          if (res == true) {
+            _cargarProductos();
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

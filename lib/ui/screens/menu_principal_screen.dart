@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:proyecto_final/data/models/usuario.dart';
 import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
 import 'package:proyecto_final/ui/screens/cliente_screen.dart';
-import 'package:proyecto_final/ui/screens/producto_screen.dart';
+import 'package:proyecto_final/ui/screens/producto/producto_screen.dart';
 import 'package:proyecto_final/ui/screens/reporte_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_screen.dart';
 import 'package:proyecto_final/ui/screens/venta_screen.dart';
