@@ -5,6 +5,7 @@ class Producto {
   final double precio;
   final int stock;
   final int idSucursal;
+  final bool isActive;
 
   Producto({
     this.id,
@@ -13,6 +14,7 @@ class Producto {
     required this.precio,
     required this.stock,
     required this.idSucursal,
+    this.isActive = true,
   });
 
   factory Producto.fromJson(Map<String, dynamic> map) {
@@ -23,6 +25,7 @@ class Producto {
       precio: map['precio'],
       stock: map['stock'],
       idSucursal: map['id_sucursal'],
+      isActive: map['is_active'] == 1,
     );
   }
 
@@ -34,6 +37,7 @@ class Producto {
       'precio': precio,
       'stock': stock,
       'id_sucursal': idSucursal,
+      'is_active': isActive ? 1 : 0,
     };
   }
 }

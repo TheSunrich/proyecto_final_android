@@ -5,15 +5,17 @@ class Venta {
   final int? idCliente;
   final String metodoPago;
   final double total;
+  final DateTime? createdAt;
 
   Venta({
     this.id,
     required this.fecha,
     required this.idSucursal,
-    required this.idCliente,
+    this.idCliente,
     required this.metodoPago,
     required this.total,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toJson() {
     return {
@@ -23,6 +25,7 @@ class Venta {
       'id_cliente': idCliente,
       'metodo_pago': metodoPago,
       'total': total,
+      'created_at': createdAt?.toIso8601String(),
     };
   }
 
@@ -34,6 +37,9 @@ class Venta {
       idCliente: map['id_cliente'],
       metodoPago: map['metodo_pago'],
       total: map['total'],
+      createdAt: map['created_at'] != null
+          ? DateTime.parse(map['created_at'])
+          : null,
     );
   }
 }

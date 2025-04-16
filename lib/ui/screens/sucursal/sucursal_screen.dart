@@ -54,7 +54,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
                       border: OutlineInputBorder(),
                       hintText: 'Buscar sucursal',
                       hintStyle: TextStyle(color: Colors.grey),
-                      suffixIcon: InkWell(
+                      suffixIcon: _searchController.text.trim().isNotEmpty ? InkWell(
                         borderRadius: BorderRadius.circular(100),
                         radius: 10,
                         onTap: () {
@@ -64,7 +64,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
                         },
 
                         child: Icon(Icons.clear_rounded),
-                      ),
+                      ) : null,
                     ),
                   ),
                 ),

@@ -47,6 +47,7 @@ class DatabaseHelper {
         precio REAL NOT NULL,
         stock INTEGER NOT NULL,
         id_sucursal INTEGER,
+        is_active INTEGER DEFAULT 1,
         FOREIGN KEY (id_sucursal) REFERENCES sucursal (id)
       );
     ''');
@@ -78,6 +79,8 @@ class DatabaseHelper {
         id_cliente INTEGER,
         metodo_pago TEXT,
         total REAL NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
         FOREIGN KEY (id_sucursal) REFERENCES sucursal (id),
         FOREIGN KEY (id_cliente) REFERENCES cliente (id)
       );
@@ -137,13 +140,29 @@ class DatabaseHelper {
     return await db.insert('producto', producto.toJson());
   }
 
-  Future<List<Producto>> obtenerProductosPorSucursal(int idSucursal) async {
+  Future<List<Producto>> obtenerProductosPorSucursal(int idSucursal, [String? search, bool isActive = false]) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'producto',
-      where: 'id_sucursal = ?',
-      whereArgs: [idSucursal],
-    );
+    final List<Map<String, dynamic>> maps;
+    if(isActive){
+      maps = await db.query(
+        'producto',
+        where: 'id_sucursal = ?',
+        whereArgs: [idSucursal],
+      );
+    } else {
+      maps = await db.query(
+        'producto',
+        where: 'id_sucursal = ? AND is_active = 1',
+        whereArgs: [idSucursal],
+      );
+    }
+
+    if (search != null && search.isNotEmpty) {
+      return List.generate(
+        maps.length,
+        (i) => Producto.fromJson(maps[i]),
+      ).where((producto) => producto.nombre.toLowerCase().contains(search.toLowerCase())).toList();
+    }
     return List.generate(maps.length, (i) => Producto.fromJson(maps[i]));
   }
 
@@ -159,7 +178,22 @@ class DatabaseHelper {
 
   Future<int> eliminarProducto(int id) async {
     final db = await database;
-    return await db.delete('producto', where: 'id = ?', whereArgs: [id]);
+    return await db.update(
+      'producto',
+      {'is_active': 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> rectivarProducto(int id) async {
+    final db = await database;
+    return await db.update(
+      'producto',
+      {'is_active': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   // ================== CLIENTE ==================

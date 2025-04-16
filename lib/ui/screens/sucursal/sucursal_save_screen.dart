@@ -35,10 +35,6 @@ class _SucursalSaveScreenState extends State<SucursalSaveScreen> {
   }
 
   Future<void> _guardarSucursal() async {
-    print('${_nombreController.text} ${_nombreController.text.trim().isEmpty}');
-    print(
-      '${_ubicacionController.text} ${_ubicacionController.text.trim().isEmpty}',
-    );
     if (!_formKey.currentState!.validate() ||
         _nombreController.text.trim().isEmpty ||
         _ubicacionController.text.trim().isEmpty) {

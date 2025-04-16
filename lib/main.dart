@@ -5,13 +5,15 @@ import 'package:proyecto_final/data/providers/nav_bar_provider.dart';
 import 'package:proyecto_final/ui/screens/cliente_screen.dart';
 import 'package:proyecto_final/ui/screens/login_screen.dart';
 import 'package:proyecto_final/ui/screens/menu_principal_screen.dart';
+import 'package:proyecto_final/ui/screens/producto/producto_save_screen.dart';
 import 'package:proyecto_final/ui/screens/producto/producto_screen.dart';
 import 'package:proyecto_final/ui/screens/reporte_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_save_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_screen.dart';
 import 'package:proyecto_final/ui/screens/venta_screen.dart';
 
-import 'data/models/sucursal.dart';
+import 'package:proyecto_final/data/models/producto.dart';
+import 'package:proyecto_final/data/models/sucursal.dart';
 
 void main() {
   runApp(
@@ -39,10 +41,7 @@ class _MyAppState extends State<MyApp> {
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.indigo,
           foregroundColor: Colors.white,
-          titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {
@@ -53,16 +52,32 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/main',
       routes: {
         '/sucursal': (context) => SucursalScreen(),
-        '/sucursal/save': (context) => SucursalSaveScreen(
-          sucursal: ModalRoute.of(context)?.settings.arguments as Sucursal?,
-        ),
+        '/sucursal/save':
+            (context) => SucursalSaveScreen(
+              sucursal: ModalRoute.of(context)?.settings.arguments as Sucursal?,
+            ),
         '/producto': (context) => ProductoScreen(),
+        '/producto/save': (context) {
+          final args =
+              ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>;
+          return ProductoSaveScreen(
+            producto: args['producto'] as Producto?,
+            idSucursal: args['idSucursal'] as int,
+          );
+        },
         '/cliente': (context) => ClienteScreen(),
         '/venta': (context) => VentaScreen(),
         '/login': (context) => LoginScreen(),
-        '/main': (context) => MenuPrincipalScreen(usuario: Usuario(nombre: 'nombre', contrasena: '*****', rol: 'admin')),
+        '/main':
+            (context) => MenuPrincipalScreen(
+              usuario: Usuario(
+                nombre: 'nombre',
+                contrasena: '*****',
+                rol: 'admin',
+              ),
+            ),
         '/reporte': (context) => ReportesScreen(),
-
       },
     );
   }

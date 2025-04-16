@@ -21,8 +21,8 @@ class SucursalListItem extends StatelessWidget {
         subtitle: Text(sucursal.ubicacion),
         trailing: IconButton(
           icon: const Icon(Icons.edit_rounded),
-          onPressed: () {
-            Navigator.pushNamed(context, '/sucursal/save', arguments: sucursal)
+          onPressed: () async {
+            await Navigator.pushNamed(context, '/sucursal/save', arguments: sucursal)
                 as Sucursal?;
             reload();
           },

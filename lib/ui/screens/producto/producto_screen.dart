@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
+import 'package:proyecto_final/ui/components/producto/producto_list.dart';
 
 import '../../components/navbar/bottom_nav_bar.dart';
 
@@ -14,10 +15,7 @@ class ProductoScreen extends StatefulWidget {
 
 class _ProductoScreenState extends State<ProductoScreen> {
   final _searchController = TextEditingController();
-  final _nombreController = TextEditingController();
-  final _descripcionController = TextEditingController();
-  final _precioController = TextEditingController();
-  final _stockController = TextEditingController();
+  bool _isLoading = false;
 
   int? _sucursalSeleccionadaId;
   List<Sucursal> _sucursales = [];
@@ -29,48 +27,50 @@ class _ProductoScreenState extends State<ProductoScreen> {
     _cargarSucursales();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _cargarSucursales() async {
     final data = await DatabaseHelper().obtenerSucursales();
     setState(() {
       _sucursales = data;
       if (_sucursales.isNotEmpty) {
-        _sucursalSeleccionadaId ??= _sucursales.first.id;
         _cargarProductos();
       }
     });
   }
 
   Future<void> _cargarProductos() async {
-    if (_sucursalSeleccionadaId == null) return;
-    final data = await DatabaseHelper().obtenerProductosPorSucursal(
-      _sucursalSeleccionadaId!,
-    );
     setState(() {
-      _productos = data;
+      _isLoading = true;
+    });
+
+    if (_sucursalSeleccionadaId != null) {
+      final data = await DatabaseHelper().obtenerProductosPorSucursal(
+        _sucursalSeleccionadaId!,
+        _searchController.text.trim(),
+        true,
+      );
+      setState(() {
+        _productos = data;
+      });
+    }
+    setState(() {
+      _isLoading = false;
     });
   }
 
-  Future<void> _guardarProducto() async {
-    if (_nombreController.text.isEmpty ||
-        _precioController.text.isEmpty ||
-        _stockController.text.isEmpty ||
-        _sucursalSeleccionadaId == null)
-      return;
-
-    final producto = Producto(
-      nombre: _nombreController.text,
-      descripcion: _descripcionController.text,
-      precio: double.tryParse(_precioController.text) ?? 0,
-      stock: int.tryParse(_stockController.text) ?? 0,
-      idSucursal: _sucursalSeleccionadaId!,
-    );
-
-    await DatabaseHelper().insertarProducto(producto);
-    _nombreController.clear();
-    _descripcionController.clear();
-    _precioController.clear();
-    _stockController.clear();
-    _cargarProductos();
+  Future<void> _eliminarProducto(int id) async {
+    setState(() {
+      _isLoading = true;
+    });
+    await DatabaseHelper().eliminarProducto(id);
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -83,7 +83,10 @@ class _ProductoScreenState extends State<ProductoScreen> {
           children: [
             DropdownMenu<Sucursal>(
               width: double.infinity,
-              controller: _searchController,
+              inputDecorationTheme: const InputDecorationTheme(
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
               label: const Text('Sucursal'),
               onSelected: (Sucursal? val) {
                 setState(() {
@@ -95,77 +98,113 @@ class _ProductoScreenState extends State<ProductoScreen> {
                   _sucursales
                       .map(
                         (s) => DropdownMenuEntry<Sucursal>(
-
                           value: s,
                           label: s.nombre,
                         ),
                       )
                       .toList(),
             ),
-            DropdownButton<int>(
-              value: _sucursalSeleccionadaId,
-              hint: const Text('Selecciona una sucursal'),
-              items:
-                  _sucursales.map((s) {
-                    return DropdownMenuItem<int>(
-                      value: s.id,
-                      child: Text(s.nombre!),
-                    );
-                  }).toList(),
-              onChanged: (val) {
-                setState(() {
-                  _sucursalSeleccionadaId = val;
-                  _cargarProductos();
-                });
-              },
-            ),
-            TextField(
-              controller: _nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre del producto',
-              ),
-            ),
-            TextField(
-              controller: _descripcionController,
-              decoration: const InputDecoration(labelText: 'Descripción'),
-            ),
-            TextField(
-              controller: _precioController,
-              decoration: const InputDecoration(labelText: 'Precio'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _stockController,
-              decoration: const InputDecoration(labelText: 'Stock'),
-              keyboardType: TextInputType.number,
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      labelText: 'Busqueda',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
+                      hintText: 'Buscar sucursal',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      suffixIcon: _searchController.text.trim().isNotEmpty ? InkWell(
+                        borderRadius: BorderRadius.circular(100),
+                        radius: 10,
+                        onTap: () {
+                          _searchController.clear();
+                          FocusScope.of(context).unfocus();
+                          _cargarSucursales();
+                        },
+
+                        child: Icon(Icons.clear_rounded),
+                      ) : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed:
+                      _isLoading || _sucursalSeleccionadaId == null || _productos.isEmpty
+                          ? null
+                          : _cargarSucursales,
+                  icon: Icon(Icons.search_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.indigo,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey,
+                    disabledForegroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _guardarProducto,
-              child: const Text('Guardar Producto'),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _productos.length,
-                itemBuilder: (context, index) {
-                  final p = _productos[index];
-                  return ListTile(
-                    title: Text(p.nombre),
-                    subtitle: Text(
-                      'Precio: \$${p.precio} - Stock: ${p.stock}',
-                    ),
-                  );
-                },
-              ),
-            ),
+            _isLoading
+                ? Expanded(child: Center(child: CircularProgressIndicator()))
+                : _sucursalSeleccionadaId == null
+                ? Expanded(
+                  child: Center(
+                    child: Text('No se ha seleccionado una sucursal'),
+                  ),
+                )
+                : _productos.isEmpty
+                ? Expanded(
+                  child: Center(child: Text('No hay productos registrados')),
+                )
+                : Expanded(
+                  child: ProductoList(
+                    productos: _productos,
+                    reload: _cargarProductos,
+                    delete: _eliminarProducto,
+                  ),
+                ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final res = await Navigator.pushNamed(context, '/producto/save');
+          if (_sucursalSeleccionadaId == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Seleccione una sucursal primero'),
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.red,
+                padding: EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                elevation: 5,
+              ),
+              snackBarAnimationStyle: AnimationStyle(
+                curve: Curves.easeIn,
+                duration: Duration(milliseconds: 500),
+                reverseCurve: Curves.easeOut,
+                reverseDuration: Duration(milliseconds: 500),
+              ),
+            );
+            return;
+          }
+          final res = await Navigator.pushNamed(
+            context,
+            '/producto/save',
+            arguments: {
+              'producto': null,
+              'idSucursal': _sucursalSeleccionadaId,
+            },
+          );
           if (res == true) {
             _cargarProductos();
           }
