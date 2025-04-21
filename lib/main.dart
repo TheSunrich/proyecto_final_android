@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/data/models/venta.dart';
 import 'package:proyecto_final/data/providers/nav_bar_provider.dart';
-import 'package:proyecto_final/ui/screens/cliente_screen.dart';
+import 'package:proyecto_final/ui/screens/cliente/cliente_save_screen.dart';
+import 'package:proyecto_final/ui/screens/cliente/cliente_screen.dart';
 import 'package:proyecto_final/ui/screens/login_screen.dart';
 import 'package:proyecto_final/ui/screens/menu_principal_screen.dart';
+import 'package:proyecto_final/ui/screens/pago/pago_save_screen.dart';
+import 'package:proyecto_final/ui/screens/pago/pago_screen.dart';
 import 'package:proyecto_final/ui/screens/producto/producto_save_screen.dart';
 import 'package:proyecto_final/ui/screens/producto/producto_screen.dart';
 import 'package:proyecto_final/ui/screens/reporte_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_save_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_screen.dart';
-import 'package:proyecto_final/ui/screens/venta_screen.dart';
+import 'package:proyecto_final/ui/screens/venta/venta_screen.dart';
 
 import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
@@ -39,7 +43,6 @@ class _MyAppState extends State<MyApp> {
         colorSchemeSeed: Colors.indigo,
         brightness: Brightness.light,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.indigo,
           foregroundColor: Colors.white,
           titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
@@ -67,7 +70,16 @@ class _MyAppState extends State<MyApp> {
           );
         },
         '/cliente': (context) => ClienteScreen(),
+        '/cliente/save':
+            (context) => ClienteSaveScreen(
+              cliente: ModalRoute.of(context)?.settings.arguments as Usuario?,
+            ),
         '/venta': (context) => VentaScreen(),
+        '/pago': (context) => PagoScreen(),
+        '/pago/save':
+            (context) => PagoSaveScreen(
+              venta: ModalRoute.of(context)?.settings.arguments as Venta,
+            ),
         '/login': (context) => LoginScreen(),
         '/main':
             (context) => MenuPrincipalScreen(

@@ -1,51 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_final/core/theme/theme.dart';
-import 'package:proyecto_final/data/models/producto.dart';
 
 import 'package:proyecto_final/core/database/database_helper.dart';
+import 'package:proyecto_final/core/theme/theme.dart';
+import 'package:proyecto_final/data/models/usuario.dart';
 
-class ProductoSaveScreen extends StatefulWidget {
-  final Producto? producto;
-  final int idSucursal;
+class ClienteSaveScreen extends StatefulWidget {
+  final Usuario? cliente;
 
-  const ProductoSaveScreen({
-    super.key,
-    this.producto,
-    required this.idSucursal,
-  });
+  const ClienteSaveScreen({super.key, this.cliente});
 
   @override
-  State<ProductoSaveScreen> createState() => _ProductoSaveScreenState();
+  State<ClienteSaveScreen> createState() => _ClienteSaveScreenState();
 }
 
-class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
+class _ClienteSaveScreenState extends State<ClienteSaveScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
-  final _descripcionController = TextEditingController();
-  final _precioController = TextEditingController();
-  final _stockController = TextEditingController();
+  final _telefonoController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _contrasenaController = TextEditingController();
+
+  bool _isVisible = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.producto != null) {
-      _nombreController.text = widget.producto!.nombre;
-      _descripcionController.text = widget.producto!.descripcion!;
-      _precioController.text = widget.producto!.precio.toString();
-      _stockController.text = widget.producto!.stock.toString();
+    if (widget.cliente != null) {
+      _nombreController.text = widget.cliente!.nombre;
+      _telefonoController.text = widget.cliente!.telefono!;
+      _emailController.text = widget.cliente!.email!;
     }
   }
 
   @override
   void dispose() {
     _nombreController.dispose();
-    _descripcionController.dispose();
-    _precioController.dispose();
-    _stockController.dispose();
+    _telefonoController.dispose();
+    _emailController.dispose();
+    _contrasenaController.dispose();
     super.dispose();
   }
 
-  Future<void> _guardarProducto() async {
+  void toggleVisibility() {
+    setState(() {
+      _isVisible = !_isVisible;
+    });
+  }
+
+  /*Future<void> _guardarProducto() async {
     if (!_formKey.currentState!.validate() ||
         _nombreController.text.isEmpty ||
         _precioController.text.isEmpty ||
@@ -54,7 +56,7 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
     }
 
     final producto = Producto(
-      id: widget.producto?.id,
+      id: widget.cliente?.id,
       nombre: _nombreController.text,
       descripcion: _descripcionController.text,
       precio: double.tryParse(_precioController.text) ?? 0,
@@ -62,7 +64,7 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
       idSucursal: widget.idSucursal,
     );
 
-    if (widget.producto != null) {
+    if (widget.cliente != null) {
       await DatabaseHelper().actualizarProducto(producto);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -83,14 +85,55 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
     _descripcionController.clear();
     _precioController.clear();
     _stockController.clear();
-    Navigator.pop(context, widget.producto != null ? producto : true);
+    Navigator.pop(context, widget.cliente != null ? producto : true);
+  }*/
+
+  Future<void> _guardarCliente() async {
+    if (!_formKey.currentState!.validate() ||
+        _nombreController.text.isEmpty ||
+        _telefonoController.text.isEmpty ||
+        _contrasenaController.text.isEmpty ||
+        _emailController.text.isEmpty) {
+      return;
+    }
+
+    final cliente = Usuario(
+      id: widget.cliente?.id,
+      nombre: _nombreController.text,
+      telefono: _telefonoController.text,
+      email: _emailController.text,
+      contrasena: _contrasenaController.text,
+      rol: 'cliente',
+    );
+    if (widget.cliente != null) {
+      await DatabaseHelper().actualizarUsuario(cliente);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cliente actualizado con éxito'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      await DatabaseHelper().insertarUsuario(cliente);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cliente guardado con éxito'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+    _nombreController.clear();
+    _telefonoController.clear();
+    _emailController.clear();
+    _contrasenaController.clear();
+    Navigator.pop(context, widget.cliente != null ? cliente : true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Guardar Producto'),
+        title: const Text('Guardar Cliente'),
         flexibleSpace: CustomTheme.appBarTheme,
       ),
       body: Form(
@@ -105,7 +148,7 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
                   isDense: true,
                   labelText: 'Nombre',
                   border: OutlineInputBorder(),
-                  hintText: 'Nuevo Producto',
+                  hintText: 'Nombre completo del cliente',
                   hintStyle: TextStyle(color: Colors.grey),
                 ),
                 validator: (value) {
@@ -117,65 +160,80 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _descripcionController,
+                controller: _telefonoController,
                 decoration: const InputDecoration(
                   isDense: true,
-                  labelText: 'Descripción',
+                  labelText: 'Teléfono',
                   border: OutlineInputBorder(),
-                  hintText: 'Descripción del producto',
+                  hintText: 'Telefono del cliente',
                   hintStyle: TextStyle(color: Colors.grey),
                 ),
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                minLines: 3,
+                keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un descripción';
+                    return 'Por favor ingrese un teléfono';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _precioController,
+                controller: _emailController,
                 decoration: const InputDecoration(
                   isDense: true,
-                  labelText: 'Precio',
-                  prefixIcon: Icon(Icons.attach_money_outlined),
+                  labelText: 'Email',
                   border: OutlineInputBorder(),
+                  hintText: 'usuario@ejemplo.com',
                   hintStyle: TextStyle(color: Colors.grey),
                 ),
+                keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un precio';
+                    return 'Por favor ingrese un email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Por favor ingrese un email válido';
                   }
                   return null;
                 },
-                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _stockController,
-                decoration: const InputDecoration(
+                controller: _contrasenaController,
+                decoration: InputDecoration(
                   isDense: true,
-                  labelText: 'Existencias',
+                  labelText: 'Contraseña',
                   border: OutlineInputBorder(),
-                  hintText: 'Cantidad de productos a ingresar',
+                  hintText: '*********',
                   hintStyle: TextStyle(color: Colors.grey),
+                  suffixIcon: InkWell(
+                    borderRadius: BorderRadius.circular(100),
+                    radius: 10,
+                    onTap: () {
+                      toggleVisibility();
+                    },
+                    child: Icon(
+                      _isVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: !_isVisible,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un nombre';
+                    return 'Por favor ingrese una contraseña';
                   }
                   return null;
                 },
-                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _guardarProducto,
+                  onPressed: _guardarCliente,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.indigo,
                     foregroundColor: Colors.white,
@@ -184,7 +242,7 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Guardar Producto'),
+                  child: const Text('Guardar Cliente'),
                 ),
               ),
             ],

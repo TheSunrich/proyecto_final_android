@@ -1,39 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/core/theme/theme.dart';
-import 'package:proyecto_final/data/models/sucursal.dart';
-
+import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/ui/components/cliente/cliente_list.dart';
 import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
-import 'package:proyecto_final/ui/components/sucursal/sucursal_list.dart';
 
-class SucursalScreen extends StatefulWidget {
-  const SucursalScreen({super.key});
+class ClienteScreen extends StatefulWidget {
+  const ClienteScreen({super.key});
 
   @override
-  State<SucursalScreen> createState() => _SucursalScreenState();
+  State<ClienteScreen> createState() => _ClienteScreenState();
 }
 
-class _SucursalScreenState extends State<SucursalScreen> {
+class _ClienteScreenState extends State<ClienteScreen> {
   final _searchController = TextEditingController();
-  List<Sucursal> _sucursales = [];
+
   bool _isLoading = false;
+  List<Usuario> _clientes = [];
 
   @override
   void initState() {
     super.initState();
-    _cargarSucursales();
+    _cargarClientes();
   }
 
-  Future<void> _cargarSucursales() async {
+  Future<void> _cargarClientes() async {
     setState(() {
       _isLoading = true;
     });
-    final data = await DatabaseHelper().obtenerSucursales(
+    final data = await DatabaseHelper().obtenerUsuarios(
       _searchController.text.trim(),
+      'cliente',
     );
     setState(() {
-      _sucursales = data;
       _isLoading = false;
+      _clientes = data;
     });
   }
 
@@ -41,11 +42,11 @@ class _SucursalScreenState extends State<SucursalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sucursales'),
+        title: const Text('Clientes'),
         flexibleSpace: CustomTheme.appBarTheme,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Row(
@@ -68,7 +69,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
                                 onTap: () {
                                   _searchController.clear();
                                   FocusScope.of(context).unfocus();
-                                  _cargarSucursales();
+                                  _cargarClientes();
                                 },
 
                                 child: Icon(Icons.clear_rounded),
@@ -80,9 +81,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed:
-                      _isLoading || _sucursales.isEmpty
-                          ? null
-                          : _cargarSucursales,
+                      _isLoading || _clientes.isEmpty ? null : _cargarClientes,
                   icon: Icon(Icons.search_rounded),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.indigo,
@@ -96,28 +95,19 @@ class _SucursalScreenState extends State<SucursalScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            _isLoading
-                ? Expanded(child: Center(child: CircularProgressIndicator()))
-                : _sucursales.isEmpty
-                ? Expanded(
-                  child: Center(child: Text('No hay sucursales registradas')),
-                )
-                : Expanded(
-                  child: SucursalList(
-                    sucursales: _sucursales,
-                    reload: _cargarSucursales,
-                  ),
-                ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: ClienteList(clientes: _clientes, reload: _cargarClientes),
+            ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final res = await Navigator.pushNamed(context, '/sucursal/save');
+          final res = await Navigator.pushNamed(context, '/cliente/save');
           if (res == true) {
-            _cargarSucursales();
+            _cargarClientes();
           }
         },
         child: const Icon(Icons.add),

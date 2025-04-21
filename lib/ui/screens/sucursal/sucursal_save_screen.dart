@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_final/core/theme/theme.dart';
 
 import 'package:proyecto_final/data/models/sucursal.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
@@ -20,7 +21,6 @@ class _SucursalSaveScreenState extends State<SucursalSaveScreen> {
   @override
   void initState() {
     super.initState();
-    print(widget.sucursal);
     if (widget.sucursal != null) {
       _nombreController.text = widget.sucursal!.nombre;
       _ubicacionController.text = widget.sucursal!.ubicacion;
@@ -71,7 +71,10 @@ class _SucursalSaveScreenState extends State<SucursalSaveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Guardar Sucursal')),
+      appBar: AppBar(
+        title: const Text('Guardar Sucursal'),
+        flexibleSpace: CustomTheme.appBarTheme,
+      ),
       body: Form(
         key: _formKey,
         child: Padding(

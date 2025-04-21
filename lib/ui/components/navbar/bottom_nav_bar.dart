@@ -41,9 +41,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
     },
     {
       'key': GlobalKey(),
-      'icon': Icons.add_shopping_cart_rounded,
+      'icon': Icons.shopping_cart_rounded,
       'label': 'Venta',
       'route': '/venta',
+    },
+    {
+      'key': GlobalKey(),
+      'icon': Icons.payment_rounded,
+      'label': 'Pagos',
+      'route': '/pago',
     },
     {
       'key': GlobalKey(),

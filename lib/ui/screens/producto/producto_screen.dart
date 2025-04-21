@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
+import 'package:proyecto_final/core/theme/theme.dart';
 import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
 import 'package:proyecto_final/ui/components/producto/producto_list.dart';
@@ -76,7 +77,10 @@ class _ProductoScreenState extends State<ProductoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Productos')),
+      appBar: AppBar(
+        title: const Text('Productos'),
+        flexibleSpace: CustomTheme.appBarTheme,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -117,24 +121,29 @@ class _ProductoScreenState extends State<ProductoScreen> {
                       border: OutlineInputBorder(),
                       hintText: 'Buscar sucursal',
                       hintStyle: TextStyle(color: Colors.grey),
-                      suffixIcon: _searchController.text.trim().isNotEmpty ? InkWell(
-                        borderRadius: BorderRadius.circular(100),
-                        radius: 10,
-                        onTap: () {
-                          _searchController.clear();
-                          FocusScope.of(context).unfocus();
-                          _cargarSucursales();
-                        },
+                      suffixIcon:
+                          _searchController.text.trim().isNotEmpty
+                              ? InkWell(
+                                borderRadius: BorderRadius.circular(100),
+                                radius: 10,
+                                onTap: () {
+                                  _searchController.clear();
+                                  FocusScope.of(context).unfocus();
+                                  _cargarSucursales();
+                                },
 
-                        child: Icon(Icons.clear_rounded),
-                      ) : null,
+                                child: Icon(Icons.clear_rounded),
+                              )
+                              : null,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed:
-                      _isLoading || _sucursalSeleccionadaId == null || _productos.isEmpty
+                      _isLoading ||
+                              _sucursalSeleccionadaId == null ||
+                              _productos.isEmpty
                           ? null
                           : _cargarSucursales,
                   icon: Icon(Icons.search_rounded),
