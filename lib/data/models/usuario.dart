@@ -5,6 +5,7 @@ class Usuario {
   final String? email;
   final String contrasena;
   final String rol;
+  final bool isActive;
 
   Usuario({
     this.id,
@@ -13,6 +14,7 @@ class Usuario {
     this.email,
     required this.contrasena,
     required this.rol,
+    this.isActive = true,
   });
 
   factory Usuario.fromJson(Map<String, dynamic> map) {
@@ -23,6 +25,7 @@ class Usuario {
       email: map['email'],
       contrasena: map['contrasena'],
       rol: map['rol'],
+      isActive: map['is_active'] == 1,
     );
   }
 
@@ -34,6 +37,7 @@ class Usuario {
       'email': email,
       'contrasena': contrasena,
       'rol': rol,
+      'is_active': isActive ? 1 : 0,
     };
   }
 }

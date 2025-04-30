@@ -1,70 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:proyecto_final/core/theme/theme.dart';
 import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
-import 'package:proyecto_final/ui/screens/cliente/cliente_screen.dart';
-import 'package:proyecto_final/ui/screens/producto/producto_screen.dart';
-import 'package:proyecto_final/ui/screens/reporte_screen.dart';
-import 'package:proyecto_final/ui/screens/sucursal/sucursal_screen.dart';
-import 'package:proyecto_final/ui/screens/venta/venta_screen.dart';
 
-class MenuPrincipalScreen extends StatelessWidget {
-  final Usuario usuario;
+class MenuPrincipalScreen extends StatefulWidget {
+  const MenuPrincipalScreen({super.key});
 
-  const MenuPrincipalScreen({super.key, required this.usuario});
+  @override
+  State<MenuPrincipalScreen> createState() => _MenuPrincipalScreenState();
+}
+
+class _MenuPrincipalScreenState extends State<MenuPrincipalScreen> {
+  late final Usuario _loggedUser = context.read<LoginProvider>().usuario!;
+
+  IconData _obtenerIconoRol() {
+    switch (_loggedUser.rol) {
+      case 'admin':
+        return Icons.admin_panel_settings;
+      case 'vendedor':
+        return Icons.store;
+      case 'cliente':
+        return Icons.person;
+      default:
+        return Icons.account_circle;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color = context.read<LoginProvider>().obtenerColorRol();
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Bienvenido, ${usuario.nombre}'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
-      body: ListView(
-        children: [
-          if (usuario.rol == 'admin') ...[
-            ListTile(
-              title: const Text('Sucursales'),
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SucursalScreen()),
-                  ),
-            ),
-            ListTile(
-              title: const Text('Productos'),
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ProductoScreen()),
-                  ),
-            ),
-          ],
-          ListTile(
-            title: const Text('Clientes'),
-            onTap:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ClienteScreen()),
+      appBar: CustomTheme.appBar(context, 'Bienvenido ${_loggedUser.nombre}'),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(_obtenerIconoRol(), size: 100, color: color),
+              const SizedBox(height: 24),
+              Text(
+                'Bienvenido a la aplicación de ventas para ${_loggedUser.rol == 'admin'
+                    ? 'Administrador'
+                    : _loggedUser.rol == 'vendedor'
+                    ? 'Vendedor'
+                    : 'Cliente'}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                '¡Esperamos que tengas una excelente experiencia!',
+                style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('Ventas'),
-            onTap:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const VentaScreen()),
-                ),
-          ),
-          ListTile(
-            title: const Text('Reportes'),
-            onTap:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ReportesScreen()),
-                ),
-          ),
-        ],
+        ),
       ),
       bottomNavigationBar: BottomNavBar(),
     );

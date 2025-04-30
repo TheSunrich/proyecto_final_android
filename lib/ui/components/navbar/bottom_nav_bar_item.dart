@@ -34,7 +34,9 @@ class BottomNavBarItem extends StatelessWidget {
           Navigator.pushReplacementNamed(context, route);
         },
         child: Container(
-          width: 80,
+          constraints: BoxConstraints(
+            minWidth: 80,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color:

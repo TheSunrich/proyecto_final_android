@@ -45,9 +45,7 @@ class _PagoSaveScreenState extends State<PagoSaveScreen> {
     setState(() {
       _isLoading = true;
     });
-    final detalleVenta = await DatabaseHelper().obtenerDetallesVenta(
-      venta.id!,
-    );
+    final detalleVenta = await DatabaseHelper().obtenerDetallesVenta(venta.id!);
     setState(() {
       _detalleVenta = detalleVenta;
     });
@@ -55,30 +53,24 @@ class _PagoSaveScreenState extends State<PagoSaveScreen> {
       _isLoading = false;
     });
   }
-  
+
   Future<void> _guardarPago() async {
     if (_metodoPagoController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, seleccione un método de pago'),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-        ),
+      CustomTheme.snackBar(
+        context,
+        'Por favor, seleccione un método de pago',
+        type: SnackBarType.success,
       );
       return;
     }
     final metodoPago = _metodoPagoController.text;
 
-    await DatabaseHelper().pagarVenta(
-      venta.id!,
-      metodoPago,
-    );
+    await DatabaseHelper().pagarVenta(venta.id!, metodoPago);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Pago guardado con éxito'),
-        duration: Duration(seconds: 2),
-      ),
+    CustomTheme.snackBar(
+      context,
+      'Pago guardado con éxito',
+      type: SnackBarType.success,
     );
     _metodoPagoController.clear();
     Navigator.pop(context, true);
@@ -87,10 +79,7 @@ class _PagoSaveScreenState extends State<PagoSaveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detalle de la venta'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Detalle de la venta'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -112,21 +101,23 @@ class _PagoSaveScreenState extends State<PagoSaveScreen> {
                       .toList(),
             ),
             const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _guardarPago(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            venta.isPayed
+                ? SizedBox.shrink()
+                : SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _guardarPago(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Pagar Venta'),
                   ),
                 ),
-                child: const Text('Pagar Venta'),
-              ),
-            ),
             const SizedBox(height: 24),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,

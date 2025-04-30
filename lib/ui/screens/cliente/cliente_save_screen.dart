@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/core/theme/theme.dart';
 import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 
 class ClienteSaveScreen extends StatefulWidget {
   final Usuario? cliente;
@@ -14,6 +16,8 @@ class ClienteSaveScreen extends StatefulWidget {
 }
 
 class _ClienteSaveScreenState extends State<ClienteSaveScreen> {
+  Usuario? get _cliente => widget.cliente;
+
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
   final _telefonoController = TextEditingController();
@@ -25,10 +29,10 @@ class _ClienteSaveScreenState extends State<ClienteSaveScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.cliente != null) {
-      _nombreController.text = widget.cliente!.nombre;
-      _telefonoController.text = widget.cliente!.telefono!;
-      _emailController.text = widget.cliente!.email!;
+    if (_cliente != null) {
+      _nombreController.text = _cliente!.nombre;
+      _telefonoController.text = _cliente!.telefono!;
+      _emailController.text = _cliente!.email!;
     }
   }
 
@@ -47,47 +51,6 @@ class _ClienteSaveScreenState extends State<ClienteSaveScreen> {
     });
   }
 
-  /*Future<void> _guardarProducto() async {
-    if (!_formKey.currentState!.validate() ||
-        _nombreController.text.isEmpty ||
-        _precioController.text.isEmpty ||
-        _stockController.text.isEmpty) {
-      return;
-    }
-
-    final producto = Producto(
-      id: widget.cliente?.id,
-      nombre: _nombreController.text,
-      descripcion: _descripcionController.text,
-      precio: double.tryParse(_precioController.text) ?? 0,
-      stock: int.tryParse(_stockController.text) ?? 0,
-      idSucursal: widget.idSucursal,
-    );
-
-    if (widget.cliente != null) {
-      await DatabaseHelper().actualizarProducto(producto);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Producto actualizado con éxito'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } else {
-      await DatabaseHelper().insertarProducto(producto);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Producto guardado con éxito'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-    _nombreController.clear();
-    _descripcionController.clear();
-    _precioController.clear();
-    _stockController.clear();
-    Navigator.pop(context, widget.cliente != null ? producto : true);
-  }*/
-
   Future<void> _guardarCliente() async {
     if (!_formKey.currentState!.validate() ||
         _nombreController.text.isEmpty ||
@@ -98,44 +61,60 @@ class _ClienteSaveScreenState extends State<ClienteSaveScreen> {
     }
 
     final cliente = Usuario(
-      id: widget.cliente?.id,
+      id: _cliente?.id,
       nombre: _nombreController.text,
       telefono: _telefonoController.text,
       email: _emailController.text,
       contrasena: _contrasenaController.text,
       rol: 'cliente',
     );
-    if (widget.cliente != null) {
+    if (_cliente != null) {
       await DatabaseHelper().actualizarUsuario(cliente);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cliente actualizado con éxito'),
-          duration: Duration(seconds: 2),
-        ),
+      CustomTheme.snackBar(
+        context,
+        'Cliente actualizado con éxito',
+        type: SnackBarType.success,
       );
     } else {
       await DatabaseHelper().insertarUsuario(cliente);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cliente guardado con éxito'),
-          duration: Duration(seconds: 2),
-        ),
+      CustomTheme.snackBar(
+        context,
+        'Cliente guardado con éxito',
+        type: SnackBarType.success,
       );
     }
     _nombreController.clear();
     _telefonoController.clear();
     _emailController.clear();
     _contrasenaController.clear();
-    Navigator.pop(context, widget.cliente != null ? cliente : true);
+    Navigator.pop(context, _cliente != null ? cliente : true);
+  }
+
+  void _toggleCliente() async {
+    if (_cliente!.isActive) {
+      await DatabaseHelper().eliminarUsuario(_cliente!.id!);
+      CustomTheme.snackBar(
+        context,
+        'Cliente eliminado con éxito',
+        type: SnackBarType.success,
+      );
+    } else {
+      await DatabaseHelper().reactivarUsuario(_cliente!.id!);
+      CustomTheme.snackBar(
+        context,
+        'Cliente reactivado con éxito',
+        type: SnackBarType.success,
+      );
+    }
+    Navigator.pop(context, _cliente ?? true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final loggedUser = context.read<LoginProvider>().usuario!;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Guardar Cliente'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Guardar Cliente'),
       body: Form(
         key: _formKey,
         child: Padding(
@@ -245,6 +224,31 @@ class _ClienteSaveScreenState extends State<ClienteSaveScreen> {
                   child: const Text('Guardar Cliente'),
                 ),
               ),
+              const SizedBox(height: 16),
+              _cliente != null && loggedUser.rol == 'admin'
+                  ? SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _toggleCliente,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            _cliente != null && _cliente!.isActive
+                                ? Colors.red
+                                : Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        _cliente!.isActive
+                            ? 'Eliminar Cliente'
+                            : 'Reactivar Cliente',
+                      ),
+                    ),
+                  )
+                  : const SizedBox.shrink(),
             ],
           ),
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/core/theme/theme.dart';
@@ -8,6 +8,7 @@ import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/usuario.dart';
 import 'package:proyecto_final/data/models/venta.dart';
 import 'package:proyecto_final/data/models/detalle_venta.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
 import 'package:proyecto_final/ui/components/producto/producto_card.dart';
 
@@ -19,6 +20,8 @@ class VentaScreen extends StatefulWidget {
 }
 
 class _VentaScreenState extends State<VentaScreen> {
+  late final Usuario _loggedUser = context.read<LoginProvider>().usuario!;
+
   int? _sucursalSeleccionadaId;
   int? _clienteSeleccionadoId;
   double _total = 0.0;
@@ -26,7 +29,7 @@ class _VentaScreenState extends State<VentaScreen> {
   List<Sucursal> _sucursales = [];
   List<Usuario> _clientes = [];
   List<Producto> _productos = [];
-  Map<int, int> _carrito = {}; // productoId -> cantidad
+  final Map<int, int> _carrito = {};
 
   @override
   void initState() {
@@ -36,7 +39,10 @@ class _VentaScreenState extends State<VentaScreen> {
 
   Future<void> _cargarDatosIniciales() async {
     final sucursales = await DatabaseHelper().obtenerSucursales();
-    final clientes = await DatabaseHelper().obtenerUsuarios(null, 'cliente');
+    final clientes = await DatabaseHelper().obtenerUsuarios(
+      rol: 'cliente',
+      isActive: true,
+    );
     setState(() {
       _sucursales = sucursales;
       _clientes = clientes;
@@ -76,10 +82,10 @@ class _VentaScreenState extends State<VentaScreen> {
   Future<void> _guardarVenta() async {
     if (_carrito.isEmpty || _sucursalSeleccionadaId == null) return;
 
-
     final venta = Venta(
       idSucursal: _sucursalSeleccionadaId!,
       idCliente: _clienteSeleccionadoId,
+      idVendedor: _loggedUser.id,
       total: _total,
     );
 
@@ -97,25 +103,29 @@ class _VentaScreenState extends State<VentaScreen> {
       await DatabaseHelper().reducirStock(producto.id!, entry.value);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Venta registrada exitosamente')),
+    CustomTheme.snackBar(
+      context,
+      'Venta registrada exitosamente',
+      type: SnackBarType.success,
     );
-
     _cargarProductos();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registrar Venta'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Registrar Venta'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             DropdownMenu<Sucursal>(
+              initialSelection:
+                  _sucursalSeleccionadaId != null
+                      ? _sucursales.firstWhere(
+                        (s) => s.id == _sucursalSeleccionadaId,
+                      )
+                      : null,
               width: double.infinity,
               inputDecorationTheme: const InputDecorationTheme(
                 border: OutlineInputBorder(),
@@ -126,6 +136,7 @@ class _VentaScreenState extends State<VentaScreen> {
               onSelected: (Sucursal? val) {
                 setState(() {
                   _sucursalSeleccionadaId = val?.id;
+                  _cargarProductos();
                 });
               },
               dropdownMenuEntries:
@@ -174,7 +185,7 @@ class _VentaScreenState extends State<VentaScreen> {
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
-                childAspectRatio: 1.3,
+                childAspectRatio: 1.2,
                 crossAxisSpacing: 16,
                 children:
                     _productos.map((producto) {

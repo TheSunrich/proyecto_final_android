@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/data/models/producto.dart';
+import 'package:proyecto_final/data/models/sucursal.dart';
 import 'package:proyecto_final/data/models/venta.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 import 'package:proyecto_final/data/providers/nav_bar_provider.dart';
 import 'package:proyecto_final/ui/screens/cliente/cliente_save_screen.dart';
 import 'package:proyecto_final/ui/screens/cliente/cliente_screen.dart';
@@ -11,17 +14,20 @@ import 'package:proyecto_final/ui/screens/pago/pago_save_screen.dart';
 import 'package:proyecto_final/ui/screens/pago/pago_screen.dart';
 import 'package:proyecto_final/ui/screens/producto/producto_save_screen.dart';
 import 'package:proyecto_final/ui/screens/producto/producto_screen.dart';
-import 'package:proyecto_final/ui/screens/reporte_screen.dart';
+import 'package:proyecto_final/ui/screens/reporte/reporte_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_save_screen.dart';
 import 'package:proyecto_final/ui/screens/sucursal/sucursal_screen.dart';
 import 'package:proyecto_final/ui/screens/venta/venta_screen.dart';
 
-import 'package:proyecto_final/data/models/producto.dart';
-import 'package:proyecto_final/data/models/sucursal.dart';
-
 void main() {
   runApp(
-    ChangeNotifierProvider(create: (_) => NavBarProvider(), child: MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => NavBarProvider()),
+        ChangeNotifierProvider(create: (_) => LoginProvider()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -52,7 +58,7 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       ),
-      initialRoute: '/main',
+      initialRoute: '/login',
       routes: {
         '/sucursal': (context) => SucursalScreen(),
         '/sucursal/save':
@@ -81,14 +87,7 @@ class _MyAppState extends State<MyApp> {
               venta: ModalRoute.of(context)?.settings.arguments as Venta,
             ),
         '/login': (context) => LoginScreen(),
-        '/main':
-            (context) => MenuPrincipalScreen(
-              usuario: Usuario(
-                nombre: 'nombre',
-                contrasena: '*****',
-                rol: 'admin',
-              ),
-            ),
+        '/main': (context) => MenuPrincipalScreen(),
         '/reporte': (context) => ReportesScreen(),
       },
     );

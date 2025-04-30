@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/core/theme/theme.dart';
 import 'package:proyecto_final/data/models/producto.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
+import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 import 'package:proyecto_final/ui/components/producto/producto_list.dart';
-
-import '../../components/navbar/bottom_nav_bar.dart';
+import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
 
 class ProductoScreen extends StatefulWidget {
   const ProductoScreen({super.key});
@@ -17,6 +19,7 @@ class ProductoScreen extends StatefulWidget {
 class _ProductoScreenState extends State<ProductoScreen> {
   final _searchController = TextEditingController();
   bool _isLoading = false;
+  late final Usuario _loggedUser = context.read<LoginProvider>().usuario!;
 
   int? _sucursalSeleccionadaId;
   List<Sucursal> _sucursales = [];
@@ -52,8 +55,8 @@ class _ProductoScreenState extends State<ProductoScreen> {
     if (_sucursalSeleccionadaId != null) {
       final data = await DatabaseHelper().obtenerProductosPorSucursal(
         _sucursalSeleccionadaId!,
-        _searchController.text.trim(),
-        true,
+        search: _searchController.text.trim(),
+        isActive: _loggedUser.rol == 'admin' ? null : true,
       );
       setState(() {
         _productos = data;
@@ -64,23 +67,29 @@ class _ProductoScreenState extends State<ProductoScreen> {
     });
   }
 
-  Future<void> _eliminarProducto(int id) async {
-    setState(() {
-      _isLoading = true;
-    });
-    await DatabaseHelper().eliminarProducto(id);
-    setState(() {
-      _isLoading = false;
-    });
+  void _toggleProducto(int id, bool isActive) async {
+    if (isActive) {
+      await DatabaseHelper().eliminarProducto(id);
+      CustomTheme.snackBar(
+        context,
+        'Producto eliminado con éxito',
+        type: SnackBarType.success,
+      );
+    } else {
+      await DatabaseHelper().reactivarProducto(id);
+
+      CustomTheme.snackBar(
+        context,
+        'Producto reactivado con éxito',
+        type: SnackBarType.success,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Productos'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Productos'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -90,6 +99,7 @@ class _ProductoScreenState extends State<ProductoScreen> {
               inputDecorationTheme: const InputDecorationTheme(
                 border: OutlineInputBorder(),
                 isDense: true,
+                constraints: BoxConstraints(maxHeight: 50),
               ),
               label: const Text('Sucursal'),
               onSelected: (Sucursal? val) {
@@ -176,7 +186,7 @@ class _ProductoScreenState extends State<ProductoScreen> {
                   child: ProductoList(
                     productos: _productos,
                     reload: _cargarProductos,
-                    delete: _eliminarProducto,
+                    delete: _toggleProducto,
                   ),
                 ),
           ],
@@ -186,23 +196,10 @@ class _ProductoScreenState extends State<ProductoScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           if (_sucursalSeleccionadaId == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Seleccione una sucursal primero'),
-                duration: Duration(seconds: 2),
-                backgroundColor: Colors.red,
-                padding: EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                ),
-                elevation: 5,
-              ),
-              snackBarAnimationStyle: AnimationStyle(
-                curve: Curves.easeIn,
-                duration: Duration(milliseconds: 500),
-                reverseCurve: Curves.easeOut,
-                reverseDuration: Duration(milliseconds: 500),
-              ),
+            CustomTheme.snackBar(
+              context,
+              'Seleccione una sucursal primero',
+              type: SnackBarType.error,
             );
             return;
           }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/core/theme/theme.dart';
 import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 import 'package:proyecto_final/ui/components/cliente/cliente_list.dart';
 import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
 
@@ -14,6 +16,7 @@ class ClienteScreen extends StatefulWidget {
 
 class _ClienteScreenState extends State<ClienteScreen> {
   final _searchController = TextEditingController();
+  late final Usuario _loggedUser = context.read<LoginProvider>().usuario!;
 
   bool _isLoading = false;
   List<Usuario> _clientes = [];
@@ -24,13 +27,20 @@ class _ClienteScreenState extends State<ClienteScreen> {
     _cargarClientes();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _cargarClientes() async {
     setState(() {
       _isLoading = true;
     });
     final data = await DatabaseHelper().obtenerUsuarios(
-      _searchController.text.trim(),
-      'cliente',
+      search: _searchController.text.trim(),
+      rol: 'cliente',
+      isActive: _loggedUser.rol == 'admin' ? null : true,
     );
     setState(() {
       _isLoading = false;
@@ -38,13 +48,28 @@ class _ClienteScreenState extends State<ClienteScreen> {
     });
   }
 
+  void _toggleCliente(int id, bool isActive) async {
+    if(isActive) {
+      await DatabaseHelper().eliminarUsuario(id);
+      CustomTheme.snackBar(
+        context,
+        'Cliente eliminado con éxito',
+        type: SnackBarType.success,
+      );
+    } else {
+      await DatabaseHelper().reactivarUsuario(id);
+      CustomTheme.snackBar(
+        context,
+        'Cliente reactivado con éxito',
+        type: SnackBarType.success,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Clientes'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Clientes'),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -97,7 +122,11 @@ class _ClienteScreenState extends State<ClienteScreen> {
             ),
             const SizedBox(height: 24),
             Expanded(
-              child: ClienteList(clientes: _clientes, reload: _cargarClientes),
+              child: ClienteList(
+                clientes: _clientes,
+                reload: _cargarClientes,
+                delete: _toggleCliente,
+              ),
             ),
           ],
         ),

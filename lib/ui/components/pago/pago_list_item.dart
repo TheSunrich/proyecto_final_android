@@ -17,12 +17,14 @@ class PagoListItem extends StatefulWidget {
 class _PagoListItemState extends State<PagoListItem> {
   Venta get venta => widget.venta;
   Usuario? cliente;
+  Usuario? vendedor;
   final dateFormat = DateFormat('dd MMM, yyyy HH:mm');
 
   @override
   void initState() {
     super.initState();
     _getCliente();
+    _getVendedor();
   }
 
   _getCliente() async {
@@ -31,6 +33,15 @@ class _PagoListItemState extends State<PagoListItem> {
     );
     setState(() {
       cliente = data;
+    });
+  }
+
+  _getVendedor() async {
+    final data = await DatabaseHelper().obtenerUsuarioPorId(
+      venta.idVendedor!,
+    );
+    setState(() {
+      vendedor = data;
     });
   }
 
@@ -64,6 +75,7 @@ class _PagoListItemState extends State<PagoListItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Cliente: ${cliente?.nombre ?? ''}'),
+              Text('Vendedor: ${vendedor?.nombre ?? ''}'),
               Text('Fecha: ${dateFormat.format(venta.createdAt!)}'),
               Row(
                 children: [

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:proyecto_final/core/database/database_helper.dart';
 import 'package:proyecto_final/core/theme/theme.dart';
 import 'package:proyecto_final/data/models/sucursal.dart';
+import 'package:proyecto_final/data/models/usuario.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 
 import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar.dart';
 import 'package:proyecto_final/ui/components/sucursal/sucursal_list.dart';
@@ -17,6 +20,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
   final _searchController = TextEditingController();
   List<Sucursal> _sucursales = [];
   bool _isLoading = false;
+  late final Usuario _loggedUser = context.read<LoginProvider>().usuario!;
 
   @override
   void initState() {
@@ -29,7 +33,8 @@ class _SucursalScreenState extends State<SucursalScreen> {
       _isLoading = true;
     });
     final data = await DatabaseHelper().obtenerSucursales(
-      _searchController.text.trim(),
+      search: _searchController.text.trim(),
+      isActive: _loggedUser.rol == 'admin' ? null : true,
     );
     setState(() {
       _sucursales = data;
@@ -37,13 +42,28 @@ class _SucursalScreenState extends State<SucursalScreen> {
     });
   }
 
+  void _toggleSucursal(int id, bool isActive) async {
+    if (isActive) {
+      await DatabaseHelper().eliminarSucursal(id);
+      CustomTheme.snackBar(
+        context,
+        'Sucursal Eliminada con éxito',
+        type: SnackBarType.success,
+      );
+    } else {
+      await DatabaseHelper().reactivarSucursal(id);
+      CustomTheme.snackBar(
+        context,
+        'Sucursal reactivada con éxito',
+        type: SnackBarType.success,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sucursales'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Sucursales'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -55,7 +75,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       isDense: true,
-                      labelText: 'Busqueda',
+                      labelText: 'Búsqueda',
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
                       hintText: 'Buscar sucursal',
@@ -107,6 +127,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
                   child: SucursalList(
                     sucursales: _sucursales,
                     reload: _cargarSucursales,
+                    delete: _toggleSucursal,
                   ),
                 ),
           ],

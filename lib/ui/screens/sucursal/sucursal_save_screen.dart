@@ -48,19 +48,17 @@ class _SucursalSaveScreenState extends State<SucursalSaveScreen> {
 
     if (widget.sucursal != null) {
       await DatabaseHelper().actualizarSucursal(sucursal);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sucursal actualizada con éxito'),
-          duration: Duration(seconds: 2),
-        ),
+      CustomTheme.snackBar(
+        context,
+        'Sucursal actualizada con éxito',
+        type: SnackBarType.success,
       );
     } else {
       await DatabaseHelper().insertarSucursal(sucursal);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sucursal guardada con éxito'),
-          duration: Duration(seconds: 2),
-        ),
+      CustomTheme.snackBar(
+        context,
+        'Sucursal guardada con éxito',
+        type: SnackBarType.success,
       );
     }
     _nombreController.clear();
@@ -71,10 +69,7 @@ class _SucursalSaveScreenState extends State<SucursalSaveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Guardar Sucursal'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Guardar Sucursal'),
       body: Form(
         key: _formKey,
         child: Padding(
@@ -86,7 +81,6 @@ class _SucursalSaveScreenState extends State<SucursalSaveScreen> {
                 decoration: const InputDecoration(
                   isDense: true,
                   labelText: 'Nombre',
-                  prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(),
                   hintText: 'Nueva Sucursal',
                   hintStyle: TextStyle(color: Colors.grey),
@@ -104,7 +98,6 @@ class _SucursalSaveScreenState extends State<SucursalSaveScreen> {
                 decoration: const InputDecoration(
                   isDense: true,
                   labelText: 'Ubicación',
-                  prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(),
                   hintText: 'Ubicación de la sucursal',
                   hintStyle: TextStyle(color: Colors.grey),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:proyecto_final/data/providers/login_provider.dart';
 import 'package:proyecto_final/data/providers/nav_bar_provider.dart';
 import 'package:proyecto_final/ui/components/navbar/bottom_nav_bar_item.dart';
 
@@ -20,48 +21,78 @@ class _BottomNavBarState extends State<BottomNavBar> {
       'icon': Icons.home_rounded,
       'label': 'Inicio',
       'route': '/main',
+      'role': [
+        'admin',
+        'vendedor',
+        'cliente',
+      ],
     },
     {
       'key': GlobalKey(),
       'icon': Icons.corporate_fare_rounded,
       'label': 'Sucursales',
       'route': '/sucursal',
+      'role': [
+        'admin',
+      ],
     },
     {
       'key': GlobalKey(),
       'icon': Icons.inventory_2_rounded,
       'label': 'Productos',
       'route': '/producto',
+      'role': [
+        'admin',
+      ],
     },
     {
       'key': GlobalKey(),
       'icon': Icons.people_alt_rounded,
       'label': 'Clientes',
       'route': '/cliente',
+      'role': [
+        'admin',
+        'vendedor',
+      ],
     },
     {
       'key': GlobalKey(),
       'icon': Icons.shopping_cart_rounded,
       'label': 'Venta',
       'route': '/venta',
+      'role': [
+        'admin',
+        'vendedor',
+      ],
     },
     {
       'key': GlobalKey(),
       'icon': Icons.payment_rounded,
       'label': 'Pagos',
       'route': '/pago',
-    },
-    {
-      'key': GlobalKey(),
-      'icon': Icons.login_rounded,
-      'label': 'Login',
-      'route': '/login',
+      'role': [
+        'cliente',
+      ],
     },
     {
       'key': GlobalKey(),
       'icon': Icons.recent_actors_rounded,
       'label': 'Reportes',
       'route': '/reporte',
+      'role': [
+        'admin',
+      ],
+    },
+    {
+      'key': GlobalKey(),
+      'icon': Icons.logout_rounded,
+      'label': 'Cerrar Sesión',
+      'route': '/login',
+      'role': [
+        'admin',
+        'vendedor',
+        'cliente',
+      ],
     },
   ];
 
@@ -92,6 +123,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
+    final userRole = context.watch<LoginProvider>().usuario!.rol;
+
     return BottomAppBar(
       height: 85,
       child: SingleChildScrollView(
@@ -99,36 +132,20 @@ class _BottomNavBarState extends State<BottomNavBar> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: List.generate(navBarItems.length, (index) {
-            return BottomNavBarItem(
-              index: index,
-              key: navBarItems[index]['key'] as GlobalKey,
-              label: navBarItems[index]['label'] as String,
-              icon: navBarItems[index]['icon'] as IconData,
-              route: navBarItems[index]['route'] as String,
-            );
+            final item = navBarItems[index];
+            if (item['role'].contains(userRole)) {
+              return BottomNavBarItem(
+                index: index,
+                key: navBarItems[index]['key'] as GlobalKey,
+                label: navBarItems[index]['label'] as String,
+                icon: navBarItems[index]['icon'] as IconData,
+                route: navBarItems[index]['route'] as String,
+              );
+            }
+            return const SizedBox.shrink();
           }),
         ),
       ),
     );
   }
 }
-
-/*BottomNavigationBar(
-      currentIndex: selectedIndex,
-      onTap: onItemTapped,
-      type: BottomNavigationBarType.fixed,
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Sucursales'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_basket_rounded), label: 'Clientes'),
-        //BottomNavigationBarItem(icon: Icon(Icons.event_repeat_outlined), label: 'Eventos'),
-        BottomNavigationBarItem(icon: Icon(Icons.monetization_on_rounded), label: 'Finanzas'),
-        BottomNavigationBarItem(icon: Icon(Icons.pin_drop_rounded), label: 'Ubicaciones'),
-      ],
-    )*/

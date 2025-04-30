@@ -3,7 +3,7 @@ import 'package:proyecto_final/data/models/producto.dart';
 
 class ProductoCard extends StatelessWidget {
   final Producto producto;
-  final cantidad;
+  final int cantidad;
   final Function(int, int, double) actualizarCantidad;
 
   const ProductoCard({
@@ -23,6 +23,7 @@ class ProductoCard extends StatelessWidget {
           children: [
             Text(
               producto.nombre,
+              textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Text('\$${producto.precio}'),

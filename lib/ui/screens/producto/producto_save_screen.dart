@@ -64,19 +64,17 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
 
     if (widget.producto != null) {
       await DatabaseHelper().actualizarProducto(producto);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Producto actualizado con éxito'),
-          duration: Duration(seconds: 2),
-        ),
+      CustomTheme.snackBar(
+        context,
+        'Producto actualizado con éxito',
+        type: SnackBarType.success,
       );
     } else {
       await DatabaseHelper().insertarProducto(producto);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Producto guardado con éxito'),
-          duration: Duration(seconds: 2),
-        ),
+      CustomTheme.snackBar(
+        context,
+        'Producto guardado con éxito',
+        type: SnackBarType.success,
       );
     }
     _nombreController.clear();
@@ -89,10 +87,7 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Guardar Producto'),
-        flexibleSpace: CustomTheme.appBarTheme,
-      ),
+      appBar: CustomTheme.appBar(context, 'Guardar Producto'),
       body: Form(
         key: _formKey,
         child: Padding(
@@ -128,12 +123,6 @@ class _ProductoSaveScreenState extends State<ProductoSaveScreen> {
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
                 minLines: 3,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un descripción';
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 16),
               TextFormField(
